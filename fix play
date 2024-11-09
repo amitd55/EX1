@@ -32,29 +32,32 @@ public class GameLogic implements PlayableLogic {
         return false;
     }
 
-    private Position checkPosition(int row, int col, int rowAdd, int colAdd, Disc disc) {
-        int rowMove = row + rowAdd;
-        int colMove = col + colAdd;
-        boolean foundOpponentDisc = false;
+ private Position checkPosition(int row, int col, int rowAdd, int colAdd, boolean currentPlayerIsPlayerOne) {
+    int rowMove = row + rowAdd;
+    int colMove = col + colAdd;
+    boolean foundOpponentDisc = false;
 
-        while (isValidPosition(rowMove, colMove)) {
-            if (board[rowMove][colMove] == null) {
+    while (isValidPosition(rowMove, colMove)) {
+        Disc currentDisc = board[rowMove][colMove];
+
+        if (currentDisc == null) {
+            return null;
+        }
+        if (currentDisc.getOwner().isPlayerOne() != currentPlayerIsPlayerOne) {
+            foundOpponentDisc = true;
+        } else {
+            if (foundOpponentDisc) {
+                return new Position(rowMove, colMove);
+            } else {
                 return null;
             }
-            if (board[rowMove][colMove].getOwner().isPlayerOne() != disc.getOwner().isPlayerOne()) {
-                foundOpponentDisc = true;
-            } else {
-                if (foundOpponentDisc) {
-                    return new Position(rowMove, colMove);
-                } else {
-                    return null;
-                }
-            }
-            rowMove += rowAdd;
-            colMove += colAdd;
         }
-        return null;
+        rowMove += rowAdd;
+        colMove += colAdd;
     }
+    return null;
+}
+
 
     private boolean isValidPosition(int row, int col) {
         return row >= 0 && col >= 0 && row < board.length && col < board[0].length;
@@ -107,16 +110,17 @@ public class GameLogic implements PlayableLogic {
     }
 
     private boolean isValidMoveInAnyDirection(int row, int col) {
-        Disc disc = isFirstPlayerTurn ? new Disc(player1) : new Disc(player2);
-        return checkPosition(row, col, 1, 0, disc) != null ||
-                checkPosition(row, col, 1, 1, disc) != null ||
-                checkPosition(row, col, 1, -1, disc) != null ||
-                checkPosition(row, col, 0, 1, disc) != null ||
-                checkPosition(row, col, 0, -1, disc) != null ||
-                checkPosition(row, col, -1, -1, disc) != null ||
-                checkPosition(row, col, -1, 1, disc) != null ||
-                checkPosition(row, col, -1, 0, disc) != null;
-    }
+    boolean currentPlayerIsPlayerOne = isFirstPlayerTurn;
+    return checkPosition(row, col, 1, 0, currentPlayerIsPlayerOne) != null ||
+            checkPosition(row, col, 1, 1, currentPlayerIsPlayerOne) != null ||
+            checkPosition(row, col, 1, -1, currentPlayerIsPlayerOne) != null ||
+            checkPosition(row, col, 0, 1, currentPlayerIsPlayerOne) != null ||
+            checkPosition(row, col, 0, -1, currentPlayerIsPlayerOne) != null ||
+            checkPosition(row, col, -1, -1, currentPlayerIsPlayerOne) != null ||
+            checkPosition(row, col, -1, 1, currentPlayerIsPlayerOne) != null ||
+            checkPosition(row, col, -1, 0, currentPlayerIsPlayerOne) != null;
+}
+
 
   private void countFlipsInDirection(int row, int col, int rowAdd, int colAdd, List<Position> flippedPositions, boolean currentPlayerIsPlayerOne) {
     int rowMove = row + rowAdd;
