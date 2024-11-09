@@ -118,47 +118,48 @@ public class GameLogic implements PlayableLogic {
                 checkPosition(row, col, -1, 0, disc) != null;
     }
 
-    private void countFlipsInDirection(int row, int col, int rowAdd, int colAdd, List<Position> flippedPositions, boolean currentPlayerIsPlayerOne) {
-        int rowMove = row + rowAdd;
-        int colMove = col + colAdd;
-        List<Position> tempFlips = new ArrayList<>();
+  private void countFlipsInDirection(int row, int col, int rowAdd, int colAdd, List<Position> flippedPositions, boolean currentPlayerIsPlayerOne) {
+    int rowMove = row + rowAdd;
+    int colMove = col + colAdd;
+    List<Position> tempFlips = new ArrayList<>();
 
-        while (isValidPosition(rowMove, colMove)) {
-            Disc currentDisc = board[rowMove][colMove];
-            Position currentPosition = new Position(rowMove, colMove);
+    while (isValidPosition(rowMove, colMove)) {
+        Disc currentDisc = board[rowMove][colMove];
+        Position currentPosition = new Position(rowMove, colMove);
 
-            if (currentDisc == null) {
-                return;
-            }
-            if (currentDisc.getOwner().isPlayerOne() != currentPlayerIsPlayerOne) {
-                tempFlips.add(currentPosition);
-            } else {
-                flippedPositions.addAll(tempFlips);
-                return;
-            }
-            rowMove += rowAdd;
-            colMove += colAdd;
+        if (currentDisc == null) {
+            return;
         }
+        if (currentDisc.getOwner().isPlayerOne() != currentPlayerIsPlayerOne) {
+            tempFlips.add(currentPosition);
+        } else {
+            flippedPositions.addAll(tempFlips);
+            return;
+        }
+        rowMove += rowAdd;
+        colMove += colAdd;
     }
+}
+
 
     @Override
     public int countFlips(Position a) {
-        List<Position> flippedPositions = new ArrayList<>();
-        int row = a.getRow();
-        int col = a.getCol();
-        boolean currentPlayerIsPlayerOne = isFirstPlayerTurn;
+         List<Position> flippedPositions = new ArrayList<>();
+    int row = a.getRow();
+    int col = a.getCol();
+    boolean currentPlayerIsPlayerOne = isFirstPlayerTurn;
 
-        countFlipsInDirection(row, col, 1, 0, flippedPositions, currentPlayerIsPlayerOne);
-        countFlipsInDirection(row, col, 1, 1, flippedPositions, currentPlayerIsPlayerOne);
-        countFlipsInDirection(row, col, 1, -1, flippedPositions, currentPlayerIsPlayerOne);
-        countFlipsInDirection(row, col, 0, 1, flippedPositions, currentPlayerIsPlayerOne);
-        countFlipsInDirection(row, col, 0, -1, flippedPositions, currentPlayerIsPlayerOne);
-        countFlipsInDirection(row, col, -1, 0, flippedPositions, currentPlayerIsPlayerOne);
-        countFlipsInDirection(row, col, -1, -1, flippedPositions, currentPlayerIsPlayerOne);
-        countFlipsInDirection(row, col, -1, 1, flippedPositions, currentPlayerIsPlayerOne);
+    countFlipsInDirection(row, col, 1, 0, flippedPositions, currentPlayerIsPlayerOne);
+    countFlipsInDirection(row, col, 1, 1, flippedPositions, currentPlayerIsPlayerOne);
+    countFlipsInDirection(row, col, 1, -1, flippedPositions, currentPlayerIsPlayerOne);
+    countFlipsInDirection(row, col, 0, 1, flippedPositions, currentPlayerIsPlayerOne);
+    countFlipsInDirection(row, col, 0, -1, flippedPositions, currentPlayerIsPlayerOne);
+    countFlipsInDirection(row, col, -1, 0, flippedPositions, currentPlayerIsPlayerOne);
+    countFlipsInDirection(row, col, -1, -1, flippedPositions, currentPlayerIsPlayerOne);
+    countFlipsInDirection(row, col, -1, 1, flippedPositions, currentPlayerIsPlayerOne);
 
-        return flippedPositions.size();
-    }
+    return flippedPositions.size();
+}
 
     @Override
     public Player getFirstPlayer() {
