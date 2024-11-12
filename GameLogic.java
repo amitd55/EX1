@@ -24,6 +24,9 @@ public class GameLogic implements PlayableLogic {
     }
 
     private void initializeBoard() {
+        if (player1 == null || player2 == null) {
+            return;
+        }
         board[3][3] = new SimpleDisc(player1);
         board[3][4] = new SimpleDisc(player2);
         board[4][3] = new SimpleDisc(player2);
@@ -40,16 +43,23 @@ public class GameLogic implements PlayableLogic {
     private boolean checkDirection(int row, int col, int rowAdd, int colAdd, Disc disc) {
         int rowMove = row + rowAdd;
         int colMove = col + colAdd;
-        boolean found = false;
+        boolean foundOpponentDisc = false;
+
         while (isValidPosition(rowMove, colMove)) {
-            if (board[rowMove][colMove] == null) {
+            Disc currentDisc = board[rowMove][colMove];
+
+            if (currentDisc == null) {
                 return false;
             }
-            if (board[rowMove][colMove].getOwner().isPlayerOne() != disc.getOwner().isPlayerOne()) {
-                found = true;
+
+            if (currentDisc.getOwner() != null && currentDisc.getOwner() != disc.getOwner()) {
+                foundOpponentDisc = true;
+            } else if (foundOpponentDisc && currentDisc.getOwner() == disc.getOwner()) {
+                return true;
             } else {
-                return found;
+                return false;
             }
+
             rowMove += rowAdd;
             colMove += colAdd;
         }
@@ -168,6 +178,10 @@ public class GameLogic implements PlayableLogic {
 
                 if (isValidPosition(adjRow, adjCol) && board[adjRow][adjCol] != null) {
                     Disc adjDisc = board[adjRow][adjCol];
+                    if (adjDisc.getOwner() == null) {
+                        System.err.println("Error: Adjacent disc at (" + adjRow + ", " + adjCol + ") has no owner.");
+                        continue;
+                    }
                     if (!(adjDisc instanceof UnflippableDisc)) {
                         adjDisc.setOwner(newOwner);
                         System.out.println("Flipped disc at (" + adjRow + ", " + adjCol + ")");
@@ -184,32 +198,34 @@ public class GameLogic implements PlayableLogic {
 
         @Override
     public boolean locate_disc(Position a, Disc disc) {
-        int row = a.getRow();
-        int col = a.getCol();
-        if (!isValidMove(row,col,disc))
-        {
-            return false;
-        }
-        board[row][col]=disc;
-        if (disc instanceof UnflippableDisc)
-        {
-            disc.getOwner().reduce_unflippedable();
-        }
-        if (disc instanceof BombDisc)
-        {
-            disc.getOwner().reduce_bomb();
-        }
+            if (disc.getOwner() == null) {
+                System.err.println("Error: Disc at position (" + a.getRow() + ", " + a.getCol() + ") has no owner.");
+                return false;
+            }
+
+            int row = a.getRow();
+            int col = a.getCol();
+            if (!isValidMove(row, col, disc)) {
+                return false;
+            }
+            board[row][col] = disc;
+            if (disc instanceof UnflippableDisc) {
+                disc.getOwner().reduce_unflippedable();
+            }
+            if (disc instanceof BombDisc) {
+                disc.getOwner().reduce_bomb();
+            }
             System.out.println("Player " + (currentPlayer == player1 ? "1" : "2") + " placed a " + disc.getType() + " in (" + row + ", " + col + ")");
             List<Position> flippedPositions = flipDiscs(row, col, disc);
             for (Position pos : flippedPositions) {
                 Disc flippedDisc = board[pos.getRow()][pos.getCol()];
                 System.out.println("Player " + (currentPlayer == player1 ? "1" : "2") + " flipped the " + flippedDisc.getType() + " in (" + pos.getRow() + ", " + pos.getCol() + ")");
             }
-        moveHistory.push(new Move(a, disc, flippedPositions));
-        switchTurn();
-        System.out.println();
-        return true;
-    }
+            moveHistory.push(new Move(a, disc, flippedPositions));
+            switchTurn();
+            System.out.println();
+            return true;
+        }
 
     @Override
     public Disc getDiscAtPosition(Position position) {
